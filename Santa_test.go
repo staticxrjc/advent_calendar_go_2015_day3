@@ -2,35 +2,79 @@ package main
 
 import "testing"
 
-func Test(t *testing.T) {
+func TestRoute(t *testing.T) {
 	testRoute := []struct {
-		name     string
-		route    string
-		expected int
+		name       string
+		route      string
+		deliveries int
 	}{
 		{
-			name:     "> delvers to 2 houses",
-			route:    ">",
-			expected: 2,
+			name:       "> delivers to 2 houses",
+			route:      ">",
+			deliveries: 2,
+		},
+		{
+			name:       "^>v< delivers presents to 4 houses",
+			route:      "^>v<",
+			deliveries: 4,
+		},
+		{
+			name:       "^v^v^v^v^v delivers presents to 2 houses",
+			route:      "^v^v^v^v^v",
+			deliveries: 2,
 		},
 	}
 	for _, test := range testRoute {
 		t.Run(test.name, func(t *testing.T) {
-			location := Location{
-				X: 0,
-				Y: 0,
-			}
-			santa := Santa{
-				location: &location,
-			}
+			santa := NewSanta()
 			santa.Route(test.route)
 
 			got := santa.uniqueDeliveries
-			want := test.expected
+			want := test.deliveries
 
 			if got != want {
 				t.Errorf("got %d want %d", got, want)
 			}
+		})
+	}
+	testLocation := []struct {
+		name   string
+		route  string
+		expect Location
+	}{
+		{
+			name:   "Santa starts at 0,0",
+			route:  "",
+			expect: Location{0, 0, House{1}},
+		},
+		{
+			name:   "> leaves santa at x = 1, y = 0",
+			route:  ">",
+			expect: Location{1, 0, House{1}},
+		},
+		{
+			name:   "^>v< leaves santa at x = 0, y = 0",
+			route:  "^>v<",
+			expect: Location{0, 0, House{2}},
+		},
+		{
+			name:   "^v^v^v^v^v leaves santa at x = 0, y = 0",
+			route:  "^v^v^v^v^v",
+			expect: Location{0, 0, House{6}},
+		},
+	}
+	for _, test := range testLocation {
+		t.Run(test.name, func(t *testing.T) {
+			santa := NewSanta()
+			santa.Route(test.route)
+
+			got := santa.location
+			want := test.expect
+
+			if got.X != want.X || got.Y != want.Y {
+				t.Errorf("got X:%d,Y:%d want X:%d,Y:%d", got.X, got.Y, want.X, want.Y)
+			}
+
 		})
 	}
 }
